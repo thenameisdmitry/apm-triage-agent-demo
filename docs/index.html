@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>APM Triage Agent — Interactive Simulator</title>
+<title>APM Triage Agent, Interactive Simulator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -19,49 +19,54 @@
     --mono:'IBM Plex Mono',ui-monospace,'SF Mono',Menlo,monospace;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:var(--sans);background:var(--page);color:var(--ink);line-height:1.5}
+  body{font-family:var(--sans);background:var(--page);color:var(--ink);line-height:1.55;font-size:16px}
 
   header{background:var(--navy);color:#fff;padding:34px 24px 26px}
   .wrap{max-width:1120px;margin:0 auto}
-  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--ice);text-transform:uppercase}
-  header h1{font-size:clamp(22px,3.4vw,32px);font-weight:800;margin:8px 0 6px}
-  header p{color:var(--ice);font-size:14.5px;max-width:760px}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--ice);text-transform:uppercase}
+  header h1{font-size:clamp(24px,3.4vw,34px);font-weight:800;margin:8px 0 6px}
+  header p{color:var(--ice);font-size:16px;max-width:800px}
   .legend{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
-  .chip{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.06em;padding:4px 12px;border-radius:999px;border:1px solid}
+  .chip{font-family:var(--mono);font-size:11.5px;font-weight:600;letter-spacing:.06em;padding:5px 13px;border-radius:999px;border:1px solid}
   .chip.r{background:var(--r-fill);border-color:var(--r-line);color:var(--r-text)}
   .chip.a{background:var(--a-fill);border-color:var(--a-line);color:var(--a-text)}
   .chip.h{background:var(--h-fill);border-color:var(--h-line);color:var(--h-text)}
 
   .picker{padding:22px 24px 6px}
-  .picker h2, .stage h2{font-size:12px;font-family:var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
-  .scenarios{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
-  .scn{background:var(--panel);border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;text-align:left;cursor:pointer;font-family:var(--sans);transition:border-color .15s, box-shadow .15s}
+  .picker h2, .stage h2{font-size:13px;font-family:var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+  .scenarios{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+  .scn{background:var(--panel);border:1.5px solid var(--line);border-radius:10px;padding:14px 16px;text-align:left;cursor:pointer;font-family:var(--sans);transition:border-color .15s, box-shadow .15s}
   .scn:hover{border-color:var(--navy)}
   .scn:focus-visible{outline:3px solid var(--r-line);outline-offset:2px}
   .scn.sel{border-color:var(--navy);box-shadow:0 0 0 2px var(--navy)}
-  .scn b{display:block;font-size:13.5px;margin-bottom:3px}
-  .scn span{font-size:11.5px;color:var(--muted)}
+  .scn b{display:block;font-size:15px;margin-bottom:3px}
+  .scn span{font-size:13px;color:var(--muted)}
 
-  .runbar{display:flex;align-items:center;gap:14px;padding:16px 24px}
-  #runBtn{background:var(--navy);color:#fff;border:none;border-radius:8px;font-family:var(--sans);font-weight:700;font-size:15px;padding:11px 26px;cursor:pointer}
+  .situation{margin:16px 24px 0;max-width:1120px}
+  @media(min-width:1168px){.situation{margin:16px auto 0}}
+  .sitcard{display:none;background:#FFFBEB;border:1.5px solid var(--h-line);border-radius:12px;padding:16px 18px}
+  .sitcard h3{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--h-text);margin-bottom:8px}
+  .sitcard p{font-size:15.5px;color:var(--h-text)}
+
+  .runbar{display:flex;align-items:center;gap:14px;padding:16px 24px;max-width:1120px;margin:0 auto}
+  #runBtn{background:var(--navy);color:#fff;border:none;border-radius:8px;font-family:var(--sans);font-weight:700;font-size:16px;padding:12px 28px;cursor:pointer}
   #runBtn:disabled{background:#9AA3C0;cursor:not-allowed}
   #runBtn:focus-visible{outline:3px solid var(--r-line);outline-offset:2px}
-  .runnote{font-size:12px;color:var(--muted)}
+  .runnote{font-size:13.5px;color:var(--muted)}
 
-  .stage{display:grid;grid-template-columns:390px 1fr;gap:20px;padding:6px 24px 24px;max-width:1120px;margin:0 auto}
+  .stage{display:grid;grid-template-columns:400px 1fr;gap:20px;padding:6px 24px 24px;max-width:1120px;margin:0 auto}
   @media(max-width:860px){.stage{grid-template-columns:1fr}}
 
-  /* pipeline rail */
   .rail{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px}
-  .node{position:relative;display:flex;gap:12px;padding:10px 8px;border-radius:8px;opacity:.45;transition:opacity .25s, background .25s}
-  .node+.node::before{content:"";position:absolute;left:21px;top:-14px;height:14px;border-left:2px solid var(--line)}
-  .node .dot{flex:0 0 28px;height:28px;border-radius:50%;border:2px solid;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:600;background:#fff}
+  .node{position:relative;display:flex;gap:12px;padding:11px 8px;border-radius:8px;opacity:.45;transition:opacity .25s, background .25s}
+  .node+.node::before{content:"";position:absolute;left:22px;top:-14px;height:14px;border-left:2px solid var(--line)}
+  .node .dot{flex:0 0 30px;height:30px;border-radius:50%;border:2px solid;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:12px;font-weight:600;background:#fff}
   .node.r .dot{border-color:var(--r-line);color:var(--r-line)}
   .node.a .dot{border-color:var(--a-line);color:var(--a-line)}
   .node.h .dot{border-color:var(--h-line);color:var(--h-line)}
-  .node .nb b{font-size:13.5px;display:block}
-  .node .nb small{font-size:11.5px;color:var(--muted)}
-  .node .stamp{display:none;font-family:var(--mono);font-size:11px;margin-top:4px;white-space:pre-line}
+  .node .nb b{font-size:15px;display:block}
+  .node .nb small{font-size:13px;color:var(--muted)}
+  .node .stamp{display:none;font-family:var(--mono);font-size:12px;margin-top:4px;white-space:pre-line}
   .node.active{opacity:1;background:var(--s-fill)}
   .node.done{opacity:1}
   .node.done .stamp{display:block}
@@ -73,61 +78,60 @@
   .node.active{animation:pulse 1s ease-in-out infinite}
   @media(prefers-reduced-motion:reduce){.node.active{animation:none}}
 
-  /* right column */
   .out{display:flex;flex-direction:column;gap:16px}
   .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
-  .panel h3{font-size:12px;font-family:var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
-  .facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
-  .fact b{display:block;font-size:11px;color:var(--muted);font-weight:500}
-  .fact span{font-family:var(--mono);font-size:13px}
+  .panel h3{font-size:13px;font-family:var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+  .facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+  .fact b{display:block;font-size:12px;color:var(--muted);font-weight:500}
+  .fact span{font-family:var(--mono);font-size:14px}
   .delta{color:var(--stop);font-weight:600}
 
   .stopbanner{border:1.5px solid var(--s-line);background:var(--s-fill);border-radius:12px;padding:16px 18px;display:none}
-  .stopbanner b{font-family:var(--mono);font-size:13px;color:var(--s-text)}
-  .stopbanner p{font-size:13.5px;color:var(--s-text);margin-top:6px}
+  .stopbanner b{font-family:var(--mono);font-size:14px;color:var(--s-text)}
+  .stopbanner p{font-size:15px;color:var(--s-text);margin-top:6px}
 
   .card{background:var(--navy);color:#fff;border-radius:12px;padding:18px;display:none}
-  .card .cardhead{font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--ice);text-transform:uppercase;margin-bottom:10px}
+  .card .cardhead{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--ice);text-transform:uppercase;margin-bottom:10px}
   .vrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
-  .pill{font-family:var(--mono);font-size:11px;font-weight:600;padding:4px 12px;border-radius:999px}
+  .pill{font-family:var(--mono);font-size:12px;font-weight:600;padding:5px 13px;border-radius:999px}
   .pill.cause{background:var(--a-fill);color:var(--a-text)}
   .pill.sev{background:var(--h-fill);color:var(--h-text)}
   .pill.lowconf{background:#FEE2E2;color:#991B1B}
   .confwrap{margin:10px 0 12px}
-  .confwrap small{font-family:var(--mono);font-size:11px;color:var(--ice)}
+  .confwrap small{font-family:var(--mono);font-size:12px;color:var(--ice)}
   .confbar{height:8px;background:var(--navy-2);border-radius:999px;overflow:hidden;margin-top:4px}
   .confbar i{display:block;height:100%;width:0;background:var(--ice);border-radius:999px;transition:width .6s ease}
-  .card p{font-size:13.5px;margin-bottom:8px}
-  .card .rb{font-size:13px;color:var(--ice)}
-  .card .note{font-size:11.5px;font-style:italic;color:var(--ice);margin-top:10px;margin-bottom:0}
+  .card p{font-size:15px;margin-bottom:8px}
+  .card .rb{font-size:14.5px;color:var(--ice)}
+  .card .note{font-size:13px;font-style:italic;color:var(--ice);margin-top:10px;margin-bottom:0}
 
   .actions{display:none}
   .actions ul{list-style:none}
-  .actions li{display:flex;gap:10px;align-items:baseline;padding:7px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
+  .actions li{display:flex;gap:10px;align-items:baseline;padding:8px 0;border-bottom:1px dashed var(--line);font-size:15px}
   .actions li:last-child{border-bottom:none}
-  .actions .tag{font-family:var(--mono);font-size:10.5px;font-weight:600;padding:2px 10px;border-radius:999px;flex:0 0 auto}
+  .actions .tag{font-family:var(--mono);font-size:11.5px;font-weight:600;padding:3px 11px;border-radius:999px;flex:0 0 auto}
   .tag.did{background:#DCFCE7;color:#166534}
   .tag.skip{background:var(--s-fill);color:var(--s-text)}
 
-  /* trace terminal */
   .tracewrap{max-width:1120px;margin:0 auto;padding:0 24px 30px}
   .term{background:#0F172A;border-radius:12px;padding:16px 18px;min-height:120px}
-  .term h3{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#7DD3FC;margin-bottom:10px}
-  .term pre{font-family:var(--mono);font-size:11.5px;line-height:1.7;color:#CBD5E1;white-space:pre-wrap;word-break:break-word}
+  .term h3{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#7DD3FC;margin-bottom:10px}
+  .term pre{font-family:var(--mono);font-size:12.5px;line-height:1.75;color:#CBD5E1;white-space:pre-wrap;word-break:break-word}
   .term .ev{color:#7DD3FC}
 
-  footer{max-width:1120px;margin:0 auto;padding:0 24px 40px;font-size:12px;color:var(--muted)}
-  footer code{font-family:var(--mono);font-size:11.5px}
+  footer{max-width:1120px;margin:0 auto;padding:0 24px 40px;font-size:13px;color:var(--muted)}
+  footer code{font-family:var(--mono);font-size:12.5px}
 </style>
 </head>
 <body>
 
 <header>
   <div class="wrap">
-    <div class="eyebrow">Tech Ops · APM — take-home demo</div>
-    <h1>APM Triage Agent — interactive simulator</h1>
-    <p>Pick a scenario and watch one alert travel the pipeline: deterministic gates → AI reasoning → allowlisted actions.
-       All data is synthetic; the logic mirrors <code style="font-family:var(--mono)">triage_agent.py</code> — no model calls are made.</p>
+    <div class="eyebrow">Tech Ops · APM take-home demo</div>
+    <h1>APM Triage Agent, interactive simulator</h1>
+    <p>When a payment method starts failing, someone has to answer three questions fast: is it real, how bad is it, and who should be woken up?
+       This simulator shows how an AI agent answers them. Pick a scenario below and run the triage.
+       All data is synthetic; the logic mirrors <code style="font-family:var(--mono)">triage_agent.py</code> and no model calls are made.</p>
     <div class="legend">
       <span class="chip r">DETERMINISTIC RULES</span>
       <span class="chip a">AI REASONING</span>
@@ -141,7 +145,9 @@
   <div class="scenarios" id="scenarios"></div>
 </div>
 
-<div class="wrap runbar">
+<div class="situation"><div class="sitcard" id="sitcard"><h3>What is happening</h3><p id="sittext"></p></div></div>
+
+<div class="runbar">
   <button id="runBtn" disabled>Run triage</button>
   <span class="runnote" id="runNote">Select a scenario to enable the run.</span>
 </div>
@@ -149,13 +155,13 @@
 <div class="stage">
   <div class="rail" id="rail">
     <h2>2 · Pipeline</h2>
-    <div class="node r" data-n="alert"><div class="dot">A</div><div class="nb"><b>Alert received</b><small>signal enters the pipeline</small><div class="stamp"></div></div></div>
-    <div class="node r" data-n="g1"><div class="dot">G1</div><div class="nb"><b>Volume gate</b><small>&lt; 100 txn/h → statistical noise</small><div class="stamp"></div></div></div>
-    <div class="node r" data-n="g2"><div class="dot">G2</div><div class="nb"><b>Dedup gate</b><small>matches an open incident → attach, stop</small><div class="stamp"></div></div></div>
-    <div class="node r" data-n="g3"><div class="dot">G3</div><div class="nb"><b>Maintenance gate</b><small>active provider window → downgrade</small><div class="stamp"></div></div></div>
-    <div class="node r" data-n="ev"><div class="dot">E</div><div class="nb"><b>Evidence assembly</b><small>saved queries, status, deploys, tickets</small><div class="stamp"></div></div></div>
-    <div class="node a" data-n="ai"><div class="dot">AI</div><div class="nb"><b>AI reasoning</b><small>cause · severity proposal · confidence</small><div class="stamp"></div></div></div>
-    <div class="node h" data-n="act"><div class="dot">✓</div><div class="nb"><b>Actions &amp; handoff</b><small>allowlist of four; a human owns the SEV call</small><div class="stamp"></div></div></div>
+    <div class="node r" data-n="alert"><div class="dot">A</div><div class="nb"><b>Alert received</b><small>a monitoring signal enters the pipeline</small><div class="stamp"></div></div></div>
+    <div class="node r" data-n="g1"><div class="dot">G1</div><div class="nb"><b>Volume gate</b><small>too few payments? then it is just noise</small><div class="stamp"></div></div></div>
+    <div class="node r" data-n="g2"><div class="dot">G2</div><div class="nb"><b>Dedup gate</b><small>already a known incident? attach, stop</small><div class="stamp"></div></div></div>
+    <div class="node r" data-n="g3"><div class="dot">G3</div><div class="nb"><b>Maintenance gate</b><small>planned provider works? do not panic</small><div class="stamp"></div></div></div>
+    <div class="node r" data-n="ev"><div class="dot">E</div><div class="nb"><b>Evidence assembly</b><small>metrics, provider status, deploys, tickets</small><div class="stamp"></div></div></div>
+    <div class="node a" data-n="ai"><div class="dot">AI</div><div class="nb"><b>AI reasoning</b><small>likely cause · severity proposal · confidence</small><div class="stamp"></div></div></div>
+    <div class="node h" data-n="act"><div class="dot">✓</div><div class="nb"><b>Actions &amp; handoff</b><small>allowlist of four; a human owns the final call</small><div class="stamp"></div></div></div>
   </div>
 
   <div class="out">
@@ -170,10 +176,10 @@
       <div class="confwrap"><small id="confLabel"></small><div class="confbar"><i id="confFill"></i></div></div>
       <p id="cardReason"></p>
       <p class="rb" id="cardStep"></p>
-      <p class="note">Severity is a proposal — on-call confirms or overrides. External comms are drafted at most, never sent.</p>
+      <p class="note">Severity is a proposal: the on-call engineer confirms or overrides. Messages to merchants or providers are drafted at most, never sent.</p>
     </div>
     <div class="panel actions" id="actionsPanel">
-      <h3>Actions — fixed allowlist</h3>
+      <h3>Actions, a fixed allowlist</h3>
       <ul id="actionsList"></ul>
     </div>
   </div>
@@ -181,15 +187,15 @@
 
 <div class="tracewrap">
   <div class="term">
-    <h3>Decision trace — append-only</h3>
+    <h3>Decision trace, append-only</h3>
     <pre id="trace" aria-live="polite"></pre>
   </div>
 </div>
 
 <footer>
   Layer-2 verdicts here come from a transparent heuristic stub with the same output contract as the real model
-  (<code>--live</code> in the repo switches to an actual LLM). Part of the take-home package for the
-  Technical Support Engineer — APM role. Repo: <code>github.com/thenameisdmitry/apm-triage-agent-demo</code>
+  (<code>--live</code> in the repo switches to an actual LLM). Take-home package by Dmitrii Zhukov for the
+  Technical Support Engineer (APM) role. Repo: <code>github.com/thenameisdmitry/apm-triage-agent-demo</code>
 </footer>
 
 <script>
@@ -197,37 +203,22 @@
 const MIN_VOLUME = 100, STATUS_FRESH_MIN = 30, PAGE_CONF = 0.70, LOW_CONF = 0.60, DEPLOY_WIN = 45;
 
 const SCENARIOS = {
-  pix_provider_outage: {label:"Pix — provider outage", sub:"BR · success 91% → 63%",
+  pix_provider_outage: {label:"Pix: provider outage", sub:"Brazil · success 91% → 63%",
+    story:"Friday evening in Brazil. Pix payments started failing about half an hour ago: the success rate fell from 91% to 63%, and merchants are opening tickets. Somebody has to decide, fast: is this real, how bad is it, and should the on-call engineer be woken up? Run the triage and watch the agent work through it.",
     alert:{id:"ALR-3401",apm:"pix",provider:"BankoPay BR",region:"BR",signature:"pix|BankoPay BR|BR|success_rate"},
     metrics:{txn_last_hour:4180,success_rate_last_hour:0.63,success_rate_7d_baseline:0.91,decline_top:[{code:"PROVIDER_TIMEOUT",share:0.34}]},
     provider_status:{state:"degraded_performance",updated_minutes_ago:6},
     deploys:[{service:"apm-gateway",version:"v2.41.0",minutes_ago:220}],
     open_incidents:[], maintenance_windows:[],
     merchant_tickets:[{merchant:"MegaShop BR"},{merchant:"TravelNow"}]},
-  ideal_release_regression: {label:"iDeal — release regression", sub:"NL · success 93% → 71%",
-    alert:{id:"ALR-3402",apm:"ideal",provider:"NL-Gateway",region:"NL",signature:"ideal|NL-Gateway|NL|success_rate"},
-    metrics:{txn_last_hour:1650,success_rate_last_hour:0.71,success_rate_7d_baseline:0.93,decline_top:[{code:"VALIDATION_ERROR",share:0.27}]},
-    provider_status:{state:"operational",updated_minutes_ago:4},
-    deploys:[{service:"apm-gateway",version:"v2.42.0-rc1",minutes_ago:25}],
-    open_incidents:[], maintenance_windows:[], merchant_tickets:[]},
-  sofort_low_volume: {label:"Sofort — 3 a.m. blip", sub:"DE · only 14 txn/h",
+  sofort_low_volume: {label:"Sofort: 3 a.m. blip", sub:"Germany · only 14 payments this hour",
+    story:"Three in the morning in Germany. The success rate for Sofort looks terrible on the dashboard, but there were only 14 payments in the whole last hour. With numbers this small, percentages mean nothing: two failed payments can sink the metric. A good system should recognize statistical noise before waking anyone up. See if this one does.",
     alert:{id:"ALR-3403",apm:"sofort",provider:"DE-Gateway",region:"DE",signature:"sofort|DE-Gateway|DE|success_rate"},
     metrics:{txn_last_hour:14,success_rate_last_hour:0.57,success_rate_7d_baseline:0.90,decline_top:[{code:"USER_ABANDONED",share:0.43}]},
     provider_status:{state:"operational",updated_minutes_ago:3},
     deploys:[], open_incidents:[], maintenance_windows:[], merchant_tickets:[]},
-  klarna_duplicate: {label:"Klarna — duplicate signal", sub:"SE · open incident exists",
-    alert:{id:"ALR-3404",apm:"klarna",provider:"Klarna EU",region:"SE",signature:"klarna|Klarna EU|SE|callback_lag"},
-    metrics:{txn_last_hour:2210,success_rate_last_hour:0.88,success_rate_7d_baseline:0.92,decline_top:[]},
-    provider_status:{state:"degraded_performance",updated_minutes_ago:22},
-    deploys:[], open_incidents:[{id:"INC-2041",signature:"klarna|Klarna EU|SE|callback_lag"}],
-    maintenance_windows:[], merchant_tickets:[{merchant:"NordicStore"}]},
-  pix_maintenance: {label:"Pix — planned window", sub:"BR · scheduled maintenance",
-    alert:{id:"ALR-3405",apm:"pix",provider:"BankoPay BR",region:"BR",signature:"pix|BankoPay BR|BR|success_rate"},
-    metrics:{txn_last_hour:820,success_rate_last_hour:0.74,success_rate_7d_baseline:0.91,decline_top:[{code:"PROVIDER_UNAVAILABLE",share:0.21}]},
-    provider_status:{state:"maintenance",updated_minutes_ago:10},
-    deploys:[], open_incidents:[],
-    maintenance_windows:[{provider:"BankoPay BR",active:true,ends_at:"03:00 UTC"}], merchant_tickets:[]},
-  wallet_unknown: {label:"GCash — unclear dip", sub:"PH · no corroboration",
+  wallet_unknown: {label:"GCash: unclear dip", sub:"Philippines · no corroboration",
+    story:"GCash payments in the Philippines dipped from 91% to 84%. Not a disaster, but not normal either. The provider status page says all systems operational, yet it has not been updated for almost an hour. No recent deploys, no merchant complaints. There is simply not enough evidence for a confident verdict. Watch how the agent handles uncertainty, because this is where automation usually goes wrong.",
     alert:{id:"ALR-3406",apm:"local_wallet_gcash",provider:"PH-Aggregator",region:"PH",signature:"local_wallet_gcash|PH-Aggregator|PH|success_rate"},
     metrics:{txn_last_hour:940,success_rate_last_hour:0.84,success_rate_7d_baseline:0.91,decline_top:[{code:"INSUFFICIENT_FUNDS",share:0.12}]},
     provider_status:{state:"operational",updated_minutes_ago:55},
@@ -273,7 +264,7 @@ function mockReason(s){
   }
   if(degraded) conf=Math.max(0,Math.round((conf-0.15)*100)/100);
   const severity = drop>=0.50?"SEV1":drop>=0.15?"SEV2":drop>=0.05?"SEV3":"SEV4";
-  const uncertainty = degraded?[`provider status is ${st.updated_minutes_ago} min old (> ${STATUS_FRESH_MIN}) — degraded evidence`]:(cause==="unknown"?["no corroborating source"]:[]);
+  const uncertainty = degraded?[`provider status is ${st.updated_minutes_ago} min old (> ${STATUS_FRESH_MIN}), degraded evidence`]:(cause==="unknown"?["no corroborating source"]:[]);
   return {probable_cause:cause,severity,confidence:conf,reasoning,uncertainty_reasons:uncertainty,suggested_runbook_step:step};
 }
 
@@ -291,8 +282,8 @@ if (typeof document!=="undefined"){
     b.onclick=()=>{ if(running) return;
       selected=key;
       [...grid.children].forEach(c=>c.classList.remove("sel")); b.classList.add("sel");
-      $("runBtn").disabled=false; $("runNote").textContent="Ready. The run takes ~6 seconds.";
-      reset(); showSnapshot(s);
+      $("runBtn").disabled=false; $("runNote").textContent="Ready. The run takes about 6 seconds.";
+      reset(); $("sittext").textContent=s.story; $("sitcard").style.display="block"; showSnapshot(s);
     };
     grid.appendChild(b);
   });
@@ -310,7 +301,7 @@ if (typeof document!=="undefined"){
     f.push(["Method / provider",`${s.alert.apm} · ${s.alert.provider} (${s.alert.region})`]);
     f.push(["Success rate",`<span class="delta">${(m.success_rate_last_hour*100).toFixed(0)}%</span> vs ${(m.success_rate_7d_baseline*100).toFixed(0)}% baseline`]);
     f.push(["Volume",`${m.txn_last_hour} txn/h`]);
-    f.push(["Top decline",m.decline_top.length?`${m.decline_top[0].code} (${(m.decline_top[0].share*100).toFixed(0)}%)`:"—"]);
+    f.push(["Top decline",m.decline_top.length?`${m.decline_top[0].code} (${(m.decline_top[0].share*100).toFixed(0)}%)`:"none"]);
     f.push(["Provider status",`${s.provider_status.state} · ${s.provider_status.updated_minutes_ago} min ago`]);
     f.push(["Recent deploys",s.deploys.length?`${s.deploys[0].service} ${s.deploys[0].version} · ${s.deploys[0].minutes_ago} min ago`:"none"]);
     f.push(["Open incidents",s.open_incidents.length?s.open_incidents[0].id:"none"]);
@@ -342,8 +333,8 @@ if (typeof document!=="undefined"){
     for(const g of gates){
       await activate(g.gate);
       trace("gate_evaluated",{gate:names[g.gate],passed:g.passed,detail:g.detail});
-      if(g.passed){ setNode(g.gate,"pass","PASS — "+g.detail); }
-      else { setNode(g.gate,"stopped","STOP — "+g.detail); stoppedAt=g; }
+      if(g.passed){ setNode(g.gate,"pass","PASS: "+g.detail); }
+      else { setNode(g.gate,"stopped","STOP: "+g.detail); stoppedAt=g; }
       if(stoppedAt) break;
     }
 
@@ -351,8 +342,8 @@ if (typeof document!=="undefined"){
       ["ev","ai","act"].forEach(n=>node(n).classList.add("skipped"));
       if(stoppedAt.gate==="g1") node("g2").classList.add("skipped"), node("g3").classList.add("skipped");
       if(stoppedAt.gate==="g2") node("g3").classList.add("skipped");
-      const extra = stoppedAt.gate==="g2" ? " The alert was attached as evidence to the open incident — a permitted allowlist action." : "";
-      $("stopbanner").innerHTML=`<b>Run stopped at ${names[stoppedAt.gate]}.</b><p>${stoppedAt.detail}.${extra} No AI reasoning was invoked — no tokens spent, and the on-call engineer was not disturbed.</p>`;
+      const extra = stoppedAt.gate==="g2" ? " The alert was attached as evidence to the open incident, which is a permitted allowlist action." : "";
+      $("stopbanner").innerHTML=`<b>Run stopped at ${names[stoppedAt.gate]}.</b><p>${stoppedAt.detail}.${extra} No AI reasoning was invoked: no tokens spent, and the on-call engineer was not disturbed. This is the point of putting cheap rules in front of the model.</p>`;
       $("stopbanner").style.display="block";
       if(stoppedAt.gate==="g2") trace("action_executed",{action:"attach_evidence"});
       trace("run_completed",{outcome:"stopped_at_"+names[stoppedAt.gate]});
@@ -362,7 +353,7 @@ if (typeof document!=="undefined"){
     await activate("ev");
     const recentDeploys=s.deploys.filter(d=>d.minutes_ago<=DEPLOY_WIN);
     const degraded=s.provider_status.updated_minutes_ago>STATUS_FRESH_MIN;
-    setNode("ev","pass",`6 sources read · ${recentDeploys.length} deploy(s) in window${degraded?" · status stale — evidence degraded":""}`);
+    setNode("ev","pass",`6 sources read · ${recentDeploys.length} deploy(s) in window${degraded?" · status stale, evidence degraded":""}`);
     trace("evidence_built",{recent_deploys:recentDeploys.length,evidence_degraded:degraded});
 
     await activate("ai");
@@ -372,9 +363,8 @@ if (typeof document!=="undefined"){
     setNode("ai","pass",`${v.probable_cause} · ${v.severity} · conf ${v.confidence}`);
     trace("llm_output",{mode:"mock",verdict:v});
 
-    // triage card
     const low=v.confidence<LOW_CONF;
-    $("pills").innerHTML=`<span class="pill cause">${v.probable_cause}</span><span class="pill sev">${v.severity} proposal</span>${low?'<span class="pill lowconf">LOW CONFIDENCE — needs human validation</span>':''}`;
+    $("pills").innerHTML=`<span class="pill cause">${v.probable_cause}</span><span class="pill sev">${v.severity} proposal</span>${low?'<span class="pill lowconf">LOW CONFIDENCE: needs human validation</span>':''}`;
     $("confLabel").textContent=`confidence ${v.confidence}`+(v.uncertainty_reasons.length?` · ${v.uncertainty_reasons[0]}`:"");
     $("cardReason").textContent=v.reasoning;
     $("cardStep").textContent="Next step → "+v.suggested_runbook_step;
@@ -386,7 +376,7 @@ if (typeof document!=="undefined"){
     const items=[
       ["Post triage card to #apm-oncall","did","executed"],
       ["Create ticket with triage record","did","executed"],
-      [`Page on-call — requires SEV1/2 and conf ≥ ${PAGE_CONF}`,page?"did":"skip",page?"executed":"skipped"],
+      [`Page on-call (requires SEV1/2 and confidence ${PAGE_CONF} or higher)`,page?"did":"skip",page?"executed":"skipped"],
       ["Send anything to merchants or providers","skip","not on the allowlist"]
     ];
     $("actionsList").innerHTML=items.map(([t,cls,lab])=>`<li><span class="tag ${cls}">${lab}</span><span>${t}</span></li>`).join("");
@@ -394,7 +384,7 @@ if (typeof document!=="undefined"){
     trace("action_executed",{action:"post_slack_card"});
     trace("action_executed",{action:"create_ticket"});
     trace(page?"action_executed":"action_skipped",page?{action:"page_oncall"}:{action:"page_oncall",reason:"below severity/confidence threshold"});
-    setNode("act","pass",page?"card + ticket + page → human confirms SEV":"card + ticket, no page → human review");
+    setNode("act","pass",page?"card + ticket + page → human confirms severity":"card + ticket, no page → human review");
     trace("run_completed",{outcome:"triage_card_delivered"});
     running=false; $("runBtn").disabled=false;
   };

@@ -1,36 +1,81 @@
-# APM Triage Agent — take-home package
+# APM Triage Agent, take-home package
 
-*Tech Ops — APM team · AI & automation proposal · Dmytro · July 2026*
+*Tech Ops, APM team · AI and automation proposal · Dmitrii Zhukov · July 2026*
 
 > **Automate the noise. Assist the judgment. Never touch the money.**
 
-This repository accompanies my take-home proposal for the Technical Support
-Engineer (APM) role: how AI and automation can improve the APM team's incident
-operations — and, just as importantly, where they must not act. The centerpiece
-is a **triage agent** designed end-to-end (trigger → gates → AI reasoning →
-allowlisted actions → audit trail) and implemented here twice: as a runnable
-Python prototype and as an interactive browser simulator.
+## What this is
 
-## Try it in 30 seconds — no API key needed
+When a payment method starts failing, an on-call engineer spends 10-15 minutes
+answering three questions: is the alert real, how bad is it, and who should be
+involved? This repository contains a prototype of an AI agent that answers
+those questions in seconds, while a human keeps every decision that matters.
+It accompanies my take-home proposal for the Technical Support Engineer (APM)
+role.
+
+The rule behind the design: cheap deterministic checks run first, AI reasons
+only over validated signals, and nothing automated ever touches live payment
+traffic.
+
+## Three scenarios to try
+
+**1. Pix, provider outage.** Friday evening in Brazil: Pix success rate falls
+from 91% to 63%, merchants open tickets. The agent passes the gates, matches
+the drop with the provider's degraded status page, proposes SEV2 with
+confidence 0.85, and pages the on-call engineer.
+
+**2. Sofort, 3 a.m. blip.** The success rate looks terrible, but there were
+only 14 payments in the last hour. Percentages mean nothing on numbers this
+small. The volume gate stops the alert before any AI is invoked: no tokens
+spent, nobody woken up.
+
+**3. GCash, unclear dip.** Metrics moved, but nothing corroborates it, and
+the provider status page is 55 minutes stale. The agent honestly says
+"unknown", lowers its confidence to 0.3, flags the card for human validation,
+and does not page anyone. An agent that can say "I don't know" is an agent
+you can trust.
+
+## Run it (30 seconds, no API key)
 
 ```bash
-python3 triage_agent.py --list
 python3 triage_agent.py --scenario pix_provider_outage
 ```
 
-Mock mode is the default: the reasoning layer is a transparent heuristic stub
-with the same output contract as a real model, so the full pipeline runs
-offline. With an `ANTHROPIC_API_KEY` set, `--live` switches Layer 2 to an
-actual LLM (`pip install -r requirements.txt` first).
+You will see the gates evaluate one by one, then a triage card like this:
 
-**Interactive simulator (same logic, in the browser):**
-https://thenameisdmitry.github.io/apm-triage-agent-demo/ — or just open
-`docs/index.html` locally.
+```
+[G1_volume] PASS: 4180 txn/h vs. minimum 100
+[G2_dedup] PASS: no matching open incident
+[G3_maintenance] PASS: no active maintenance window
 
-## The design in one diagram
++----------------------------- TRIAGE CARD ------------------------------+
+| Verdict   : provider_outage   Severity proposal: SEV2   Confidence: 0.85
+| Reasoning : Provider reports 'degraded_performance' while success rate
+|             dropped 28% vs. 7-day baseline...
+| NOTE      : severity is a PROPOSAL: on-call confirms or overrides.
++-------------------------------------------------------------------------+
+>>> PAGING ON-CALL: proposed SEV2, confidence 0.85
+```
 
-Rules where decisions are deterministic, AI where correlation and language
-add value, humans wherever money or external parties are involved:
+Every run also writes an append-only decision trace to `traces/`: inputs,
+gate results, the full prompt, the raw verdict, and every action taken or
+skipped. Mock mode is the default; with an `ANTHROPIC_API_KEY` set, `--live`
+switches the reasoning layer to a real model
+(`pip install -r requirements.txt` first).
+
+## Interactive simulator
+
+Same three scenarios and the same logic, animated in the browser:
+
+**https://thenameisdmitry.github.io/apm-triage-agent-demo/**
+
+Or open `docs/index.html` locally. Each scenario starts with a short plain
+description of the situation, then you watch the alert travel the pipeline
+and the decision trace fill in below.
+
+## The flow in one picture
+
+Blue is deterministic rules, purple is AI, amber is a human:
 
 ```mermaid
 flowchart TD
@@ -39,83 +84,45 @@ flowchart TD
     classDef human fill:#fef3c7,stroke:#d97706,color:#7c3d00
     classDef stop fill:#f1f5f9,stroke:#94a3b8,color:#334155
 
-    subgraph LEGEND[" Legend "]
-        direction LR
-        L1["Deterministic rules"]:::rules
-        L2["AI reasoning"]:::ai
-        L3["Human decision"]:::human
-    end
-
-    A["Metrics pipeline<br/>success rate, latency, decline codes"]:::rules --> B{"Threshold breach vs<br/>dynamic baseline?"}:::rules
-    B -- "no" --> Z1["No action"]:::stop
-    B -- "yes" --> G1{"G1 — volume gate"}:::rules
-    G1 -- "below floor" --> Z2["Suppress: statistical noise,<br/>logged for threshold tuning"]:::stop
-    G1 -- "pass" --> G2{"G2 — dedup gate"}:::rules
-    G2 -- "matches open incident" --> Z3["Attach as evidence<br/>to existing incident"]:::rules
-    G2 -- "pass" --> G3{"G3 — maintenance gate"}:::rules
-    G3 -- "active window" --> Z4["Annotate and downgrade"]:::stop
-    G3 -- "pass" --> E["Evidence assembly:<br/>saved Kibana queries, provider status,<br/>deploy feed, merchant tickets"]:::rules
-    E --> AI1["AI: correlate sources, classify cause,<br/>propose severity + confidence"]:::ai
-    AI1 --> C{"confidence ≥ 0.6?"}:::rules
-    C -- "no" --> H1["Human validates manually —<br/>card flagged LOW CONFIDENCE"]:::human
-    C -- "yes" --> CARD["Triage card to Slack + ticket<br/>with evidence links"]:::rules
-    CARD --> P{"SEV1/2 and<br/>confidence ≥ 0.7?"}:::rules
-    P -- "yes" --> PG["Page on-call"]:::rules
-    P -- "no" --> H2["Human: confirm or override severity,<br/>declare incident"]:::human
-    PG --> H2
-    H2 --> AI2["AI: live incident summary +<br/>stakeholder comms drafts"]:::ai
-    AI2 --> H3["Human approves and sends comms;<br/>decides mitigation: rollback,<br/>reroute, provider escalation"]:::human
-    H3 --> AI3["AI: RCA draft +<br/>runbook update diff"]:::ai
-    AI3 --> H4["Human review — merge runbook PR"]:::human
-    H1 --> FB["Feedback loop: overrides + weekly samples<br/>drive rubric, prompt and gate tuning"]:::rules
-    H2 --> FB
-    H4 --> FB
+    A["Alert fires<br/>(success rate vs baseline)"]:::rules --> G{"Three gates:<br/>volume, dedup, maintenance"}:::rules
+    G -- "noise or already known" --> S["Stop. No AI invoked,<br/>nobody paged"]:::stop
+    G -- "pass" --> E["Collect evidence: metrics,<br/>provider status, deploys, tickets"]:::rules
+    E --> AI["AI verdict: likely cause,<br/>severity proposal, confidence"]:::ai
+    AI -- "low confidence" --> HV["Human validates manually"]:::human
+    AI -- "confident" --> C["Slack card + ticket,<br/>page on-call if serious"]:::rules
+    C --> HC["Human confirms or<br/>overrides severity"]:::human
+    HC --> DR["AI drafts comms and RCA"]:::ai
+    DR --> HA["Human reviews and sends"]:::human
+    HA --> FB["Feedback: human overrides<br/>tune gates and prompts"]:::rules
+    HV --> FB
 ```
 
-## What the prototype demonstrates
+## What keeps it safe
 
-- **Gates run before any AI.** Three deterministic gates (volume, dedup,
-  maintenance) stop roughly two thirds of noise — cheap, explainable, and no
-  tokens spent. Only validated, enriched signals reach the model.
-- **The AI verdict is always a proposal.** Paging happens only for SEV1/SEV2
-  with confidence ≥ 0.7; low-confidence verdicts are flagged for human
-  validation, and the agent is comfortable saying "unknown".
-- **The agent has no write path to anything.** Its four actions are a fixed
-  allowlist; in this demo they only print or append to local files. In
-  production the same constraint lives at the IAM level, not in the prompt.
-- **External text is untrusted.** Provider status pages and merchant tickets
-  go into the prompt wrapped as `<untrusted_data>` — evidence to classify,
-  never instructions to follow.
-- **Every run is reconstructable.** An append-only JSONL decision trace
-  (`traces/`) records inputs, gate results, the full prompt, the raw verdict,
-  and every action taken or skipped.
-
-## Scenarios
-
-| Scenario | Path exercised |
-|---|---|
-| `pix_provider_outage` | full pipeline → provider_outage, SEV2, page on-call |
-| `ideal_release_regression` | full pipeline → our_release (deploy correlation) |
-| `sofort_low_volume` | stopped at G1 — statistical noise, no AI invoked |
-| `klarna_duplicate` | stopped at G2 — attached to open incident INC-2041 |
-| `pix_maintenance` | stopped at G3 — scheduled maintenance window |
-| `wallet_unknown` | full pipeline → unknown cause, low confidence, no page |
+- The agent reads six data sources and can write to none of them. Its four
+  allowed actions (Slack card, ticket, conditional page, attach evidence)
+  are a fixed allowlist enforced in code and IAM, not in the prompt.
+- Severity is always a proposal; a human confirms or overrides it.
+- Text from merchants and provider pages goes into the prompt wrapped as
+  untrusted data: evidence to classify, never instructions to follow.
+- One environment flag turns the agent off and returns the team to fully
+  manual triage.
 
 ## Repository layout
 
 ```
 triage_agent.py       the prototype: gates → reasoning → allowlisted actions → trace
-scenarios/            six synthetic alerts, one per pipeline branch
-docs/index.html       interactive simulator (GitHub Pages serves this folder)
-diagrams/             end-to-end automation flow (Mermaid source)
-proposal/             written design: problem framing, use cases, agent deep-dive
+scenarios/            three synthetic alerts, one per outcome
+docs/index.html       interactive simulator (served by GitHub Pages)
+diagrams/             the flow diagram above (Mermaid source)
+proposal/             written design notes: framing, use cases, agent deep-dive
 requirements.txt      one optional dependency, used only by --live
 ```
 
 The full proposal deck (problem framing, three use cases, agent design,
-guardrails, KPI framework, staged rollout) is submitted alongside this repo.
+guardrails, KPIs, staged rollout) is submitted alongside this repo.
 
 ---
 
-*This package was itself built AI-assisted — the same working style it
-proposes for the team.*
+*Built AI-assisted, which is the same working style this proposal suggests
+for the team.*

@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-APM Triage Agent — demo prototype.
+APM Triage Agent: demo prototype.
 
 Implements the two-layer triage design from the accompanying proposal:
 
-  Layer 1: deterministic gates (volume, dedup, maintenance) — no AI involved.
-  Layer 2: LLM reasoning — cause classification, severity proposal, confidence.
+  Layer 1: deterministic gates (volume, dedup, maintenance): no AI involved.
+  Layer 2: LLM reasoning: cause classification, severity proposal, confidence.
 
 Runs fully offline by default (mock reasoning). If ANTHROPIC_API_KEY is set
 and --live is passed, Layer 2 calls a real model instead.
@@ -20,7 +20,7 @@ Design guarantees demonstrated here:
   * Actions are allowlisted: post card / create ticket / page / attach evidence.
   * Every run writes an append-only decision trace (traces/*.jsonl).
   * External text (merchant tickets, provider status) is wrapped as untrusted
-    data in the prompt — treated as evidence to classify, never as instructions.
+    data in the prompt: treated as evidence to classify, never as instructions.
 """
 
 import argparse
@@ -128,7 +128,7 @@ def build_evidence(scenario: dict) -> dict:
     }
     if status.get("updated_minutes_ago", 0) > STATUS_FRESHNESS_MIN:
         evidence["evidence_quality"].append(
-            f"provider status is {status['updated_minutes_ago']} min old (> {STATUS_FRESHNESS_MIN}) — degraded evidence"
+            f"provider status is {status['updated_minutes_ago']} min old (> {STATUS_FRESHNESS_MIN}): degraded evidence"
         )
     return evidence
 
@@ -234,7 +234,7 @@ def reason_live(prompt: str) -> dict:
 
 # ----------------------------- actions (allowlist) ----------------------------
 def action_post_slack_card(verdict: dict, alert: dict, low_confidence: bool) -> str:
-    flag = "  :warning: LOW CONFIDENCE — needs human validation\n" if low_confidence else ""
+    flag = "  :warning: LOW CONFIDENCE: needs human validation\n" if low_confidence else ""
     card = (
         "\n+----------------------------- TRIAGE CARD -----------------------------+\n"
         f"| Alert     : {alert['id']}  ({alert['apm']} / {alert['provider']} / {alert['region']})\n"
@@ -243,7 +243,7 @@ def action_post_slack_card(verdict: dict, alert: dict, low_confidence: bool) -> 
         f"{flag}"
         f"| Reasoning : {verdict['reasoning']}\n"
         f"| Next step : {verdict['suggested_runbook_step']}\n"
-        "| NOTE      : severity is a PROPOSAL — on-call confirms or overrides.\n"
+        "| NOTE      : severity is a PROPOSAL: on-call confirms or overrides.\n"
         "+------------------------------------------------------------------------+"
     )
     print(card)
@@ -296,7 +296,7 @@ def run(scenario_name: str, live: bool) -> None:
         res = gate_fn(scenario)
         audit.log("gate_evaluated", gate=res.gate, passed=res.passed, detail=res.detail)
         status = "PASS" if res.passed else "STOP"
-        print(f"[{res.gate}] {status} — {res.detail}")
+        print(f"[{res.gate}] {status}: {res.detail}")
         if not res.passed:
             if res.gate == "G2_dedup":
                 outcome = ALLOWED_ACTIONS["attach_evidence"](res.detail)
@@ -333,7 +333,7 @@ def run(scenario_name: str, live: bool) -> None:
     else:
         audit.log("action_skipped", action="page_oncall",
                   reason="below severity/confidence threshold")
-        print(">>> No page: severity/confidence below paging threshold — human review via Slack card.")
+        print(">>> No page: severity/confidence below paging threshold; human review via Slack card.")
 
     audit.log("run_completed", outcome="triage_card_delivered")
     print(f"=== Decision trace: {audit.path.relative_to(BASE_DIR)} ===\n")
