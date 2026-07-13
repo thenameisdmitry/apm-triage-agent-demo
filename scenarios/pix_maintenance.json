@@ -1,0 +1,31 @@
+{
+  "alert": {
+    "id": "ALR-3405",
+    "created_at": "2026-07-11T02:05:00Z",
+    "apm": "pix",
+    "provider": "BankoPay BR",
+    "region": "BR",
+    "metric": "success_rate",
+    "signature": "pix|BankoPay BR|BR|success_rate"
+  },
+  "metrics": {
+    "txn_last_hour": 820,
+    "success_rate_last_hour": 0.74,
+    "success_rate_7d_baseline": 0.91,
+    "latency_p95_ms": 2600,
+    "decline_top": [
+      {"code": "PROVIDER_UNAVAILABLE", "share": 0.21}
+    ]
+  },
+  "provider_status": {
+    "state": "maintenance",
+    "message": "Scheduled maintenance on Pix rails.",
+    "updated_minutes_ago": 10
+  },
+  "deploys": [],
+  "open_incidents": [],
+  "maintenance_windows": [
+    {"provider": "BankoPay BR", "active": true, "ends_at": "2026-07-11T03:00:00Z", "announced_days_ago": 5}
+  ],
+  "merchant_tickets": []
+}

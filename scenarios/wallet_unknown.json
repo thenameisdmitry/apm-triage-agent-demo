@@ -1,0 +1,30 @@
+{
+  "alert": {
+    "id": "ALR-3406",
+    "created_at": "2026-07-11T16:20:00Z",
+    "apm": "local_wallet_gcash",
+    "provider": "PH-Aggregator",
+    "region": "PH",
+    "metric": "success_rate",
+    "signature": "local_wallet_gcash|PH-Aggregator|PH|success_rate"
+  },
+  "metrics": {
+    "txn_last_hour": 940,
+    "success_rate_last_hour": 0.84,
+    "success_rate_7d_baseline": 0.91,
+    "latency_p95_ms": 1900,
+    "decline_top": [
+      {"code": "INSUFFICIENT_FUNDS", "share": 0.12},
+      {"code": "USER_ABANDONED", "share": 0.10}
+    ]
+  },
+  "provider_status": {
+    "state": "operational",
+    "message": "All systems operational.",
+    "updated_minutes_ago": 55
+  },
+  "deploys": [],
+  "open_incidents": [],
+  "maintenance_windows": [],
+  "merchant_tickets": []
+}

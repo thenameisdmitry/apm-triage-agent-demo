@@ -1,0 +1,37 @@
+flowchart TD
+    classDef rules fill:#dbeafe,stroke:#2563eb,color:#1e3a5f
+    classDef ai fill:#ede9fe,stroke:#7c3aed,color:#3b1d6e
+    classDef human fill:#fef3c7,stroke:#d97706,color:#7c3d00
+    classDef stop fill:#f1f5f9,stroke:#94a3b8,color:#334155
+
+    subgraph LEGEND[" Legend "]
+        direction LR
+        L1["Deterministic rules"]:::rules
+        L2["AI reasoning"]:::ai
+        L3["Human decision"]:::human
+    end
+
+    A["Metrics pipeline<br/>success rate, latency, decline codes"]:::rules --> B{"Threshold breach vs<br/>dynamic baseline?"}:::rules
+    B -- "no" --> Z1["No action"]:::stop
+    B -- "yes" --> G1{"G1 — volume gate"}:::rules
+    G1 -- "below floor" --> Z2["Suppress: statistical noise,<br/>logged for threshold tuning"]:::stop
+    G1 -- "pass" --> G2{"G2 — dedup gate"}:::rules
+    G2 -- "matches open incident" --> Z3["Attach as evidence<br/>to existing incident"]:::rules
+    G2 -- "pass" --> G3{"G3 — maintenance gate"}:::rules
+    G3 -- "active window" --> Z4["Annotate and downgrade"]:::stop
+    G3 -- "pass" --> E["Evidence assembly:<br/>saved Kibana queries, provider status,<br/>deploy feed, merchant tickets"]:::rules
+    E --> AI1["AI: correlate sources, classify cause,<br/>propose severity + confidence"]:::ai
+    AI1 --> C{"confidence ≥ 0.6?"}:::rules
+    C -- "no" --> H1["Human validates manually —<br/>card flagged LOW CONFIDENCE"]:::human
+    C -- "yes" --> CARD["Triage card to Slack + ticket<br/>with evidence links"]:::rules
+    CARD --> P{"SEV1/2 and<br/>confidence ≥ 0.7?"}:::rules
+    P -- "yes" --> PG["Page on-call"]:::rules
+    P -- "no" --> H2["Human: confirm or override severity,<br/>declare incident"]:::human
+    PG --> H2
+    H2 --> AI2["AI: live incident summary +<br/>stakeholder comms drafts"]:::ai
+    AI2 --> H3["Human approves and sends comms;<br/>decides mitigation: rollback,<br/>reroute, provider escalation"]:::human
+    H3 --> AI3["AI: RCA draft +<br/>runbook update diff"]:::ai
+    AI3 --> H4["Human review — merge runbook PR"]:::human
+    H1 --> FB["Feedback loop: overrides + weekly samples<br/>drive rubric, prompt and gate tuning"]:::rules
+    H2 --> FB
+    H4 --> FB

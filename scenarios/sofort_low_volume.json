@@ -1,0 +1,29 @@
+{
+  "alert": {
+    "id": "ALR-3403",
+    "created_at": "2026-07-11T03:12:00Z",
+    "apm": "sofort",
+    "provider": "DE-Gateway",
+    "region": "DE",
+    "metric": "success_rate",
+    "signature": "sofort|DE-Gateway|DE|success_rate"
+  },
+  "metrics": {
+    "txn_last_hour": 14,
+    "success_rate_last_hour": 0.57,
+    "success_rate_7d_baseline": 0.90,
+    "latency_p95_ms": 1100,
+    "decline_top": [
+      {"code": "USER_ABANDONED", "share": 0.43}
+    ]
+  },
+  "provider_status": {
+    "state": "operational",
+    "message": "All systems operational.",
+    "updated_minutes_ago": 3
+  },
+  "deploys": [],
+  "open_incidents": [],
+  "maintenance_windows": [],
+  "merchant_tickets": []
+}
