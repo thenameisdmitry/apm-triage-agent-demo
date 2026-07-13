@@ -1,10 +1,8 @@
-# APM Triage Agent, take-home package
+# Unlimit home task: APM Triage Agent
 
-*Tech Ops, APM team · AI and automation proposal · Dmitrii Zhukov · July 2026*
+*The task is for the position of Tech Ops, APM team · AI and automation proposal · Dmitrii Zhukov · 13 July 2026*
 
-> **Automate the noise. Assist the judgment. Never touch the money.**
-
-## What this is
+## Introduction
 
 When a payment method starts failing, an on-call engineer spends 10-15 minutes
 answering three questions: is the alert real, how bad is it, and who should be
@@ -13,8 +11,8 @@ those questions in seconds, while a human keeps every decision that matters.
 It accompanies my take-home proposal for the Technical Support Engineer (APM)
 role.
 
-The rule behind the design: cheap deterministic checks run first, AI reasons
-only over validated signals, and nothing automated ever touches live payment
+**The rule behind the design:** cheap deterministic checks run first, AI gives reasons
+only for over validated signals, and nothing automated ever touches live payment
 traffic.
 
 ## Three scenarios to try
@@ -41,7 +39,7 @@ you can trust.
 python3 triage_agent.py --scenario pix_provider_outage
 ```
 
-You will see the gates evaluate one by one, then a triage card like this:
+You will see the gates evaluated one by one, then a triage card like this:
 
 ```
 [G1_volume] PASS: 4180 txn/h vs. minimum 100
