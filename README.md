@@ -1,6 +1,6 @@
-# Unlimit home task: APM Triage Agent
+# APM Triage Agent
 
-*The task is for the position of Tech Ops, APM team · AI and automation proposal · Dmitrii Zhukov · 13 July 2026*
+*AI and automation proposal · Dmitrii Zhukov · 13 July 2026*
 
 ## Introduction
 
